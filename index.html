@@ -342,6 +342,16 @@
 
   const GREETING = "Good day, and welcome to The Spice Bistro. I can hold a table for you — shall we begin?";
 
+  // The backend only leaves the idle state on the phrase "book a table",
+  // so a plain "yes" is translated before it is sent. The chat still
+  // shows exactly what the guest typed.
+  const AFFIRMATIVE = /^(y|ya|yes|yep|yeah|yup|sure|ok|okay|please|yes please|go ahead|start|book|booking|reserve|reservation|i want to book|table)\b[\s.!,]*$/i;
+
+  function normalise(text){
+    if(state === "idle" && AFFIRMATIVE.test(text.trim())) return "book a table";
+    return text;
+  }
+
   function addMessage(text, who){
     const div = document.createElement("div");
     div.className = "msg " + who;
@@ -411,7 +421,7 @@
     const typing = showTyping();
 
     try{
-      const data = await callBackend(text);
+      const data = await callBackend(normalise(text));
       typing.remove();
       state   = data.nextState || "idle";
       context = data.context || {};
