@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Spice Bistro — Table Reservations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=Noto+Sans+Kannada:wght@300;400;500&family=Noto+Sans+Malayalam:wght@300;400;500&family=Noto+Sans+Tamil:wght@300;400;500&family=Noto+Sans+Telugu:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  @property --ang{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
+
+  :root{
+    --ink:#f4ece1;
+    --ink-soft:rgba(244,236,225,.70);
+    --ink-faint:rgba(244,236,225,.40);
+    --bg:#0d0908;
+    --line:rgba(244,236,225,.12);
+    --gold:#d8b26a;
+    --gold-hi:#f0d8a4;
+    --saffron:#e9a23b;
+    --maroon:#7a2231;
+    --maroon-deep:#5a1725;
+    --cardamom:#6f9273;
+    --serif:'Cormorant Garamond', Georgia, serif;
+    --sans:'Inter', system-ui, -apple-system, sans-serif;
+    --indic-tamil:'Noto Sans Tamil', sans-serif;
+    --indic-malayalam:'Noto Sans Malayalam', sans-serif;
+    --indic-telugu:'Noto Sans Telugu', sans-serif;
+    --indic-kannada:'Noto Sans Kannada', sans-serif;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+
+  *{box-sizing:border-box;}
+  html{height:100%;}
+
+  body{
+    margin:0;
+    min-height:100%;
+    min-height:100dvh;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-weight:300;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  :focus-visible{ outline:2px solid var(--gold-hi); outline-offset:3px; }
+  .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* Background ambiance */
+  .aurora{
+    position:fixed; inset:-30%; z-index:-4;
+    background:
+      radial-gradient(38% 42% at 22% 28%, rgba(122,34,49,.58), transparent 62%),
+      radial-gradient(34% 38% at 78% 24%, rgba(216,178,106,.22), transparent 64%),
+      radial-gradient(44% 46% at 60% 82%, rgba(122,34,49,.36), transparent 66%),
+      radial-gradient(26% 30% at 14% 86%, rgba(233,162,59,.14), transparent 68%);
+    filter:blur(30px);
+    animation:drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes drift{
+    0%{transform:translate3d(-2%,-1%,0) scale(1) rotate(0deg);}
+    50%{transform:translate3d(2%,2%,0) scale(1.07) rotate(2deg);}
+    100%{transform:translate3d(-1%,3%,0) scale(1.03) rotate(-1.5deg);}
+  }
+
+  #embers{ position:fixed; inset:0; width:100%; height:100%; z-index:-3; pointer-events:none; }
+
+  .grain{
+    position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.4;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:3px 3px;
+  }
+  .vignette{
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,.55));
+  }
+
+  /* Masthead */
+  .masthead{
+    width:100%; max-width:520px; text-align:center;
+    margin-bottom:14px;
+  }
+
+  .crest{
+    display:inline-flex; align-items:center; gap:14px;
+    font-family:var(--serif); font-style:italic; font-size:17px; letter-spacing:.06em;
+    color:var(--gold); margin-bottom:8px;
+    animation:fadeIn 1s .1s ease both;
+  }
+  .crest::before,.crest::after{
+    content:""; width:44px; height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold));
+    transform:scaleX(0); animation:draw-line 1.1s .3s var(--ease) forwards;
+  }
+  .crest::before{ transform-origin:right center; }
+  .crest::after{ background:linear-gradient(270deg,transparent,var(--gold)); transform-origin:left center; }
+  @keyframes draw-line{ to{ transform:scaleX(1); } }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+
+  .masthead h1{
+    font-family:var(--serif);
+    font-size:clamp(30px,7vw,46px);
+    font-weight:500; letter-spacing:.01em;
+    margin:0; line-height:1.1;
+    background:linear-gradient(100deg,var(--ink) 18%,var(--gold-hi) 42%,var(--gold) 52%,var(--ink) 74%);
+    background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:
+      head-in 1.4s .25s var(--ease) both,
+      sheen 8s 1.8s ease-in-out infinite backwards;
+  }
+  @keyframes head-in{
+    from{ opacity:0; letter-spacing:.09em; filter:blur(10px); transform:translateY(10px); }
+    to{ opacity:1; letter-spacing:.01em; filter:blur(0); transform:none; }
+  }
+  @keyframes sheen{
+    0%,100%{background-position:120% 0;}
+    50%{background-position:-20% 0;}
+  }
+
+  .masthead p{
+    margin:10px auto 0; max-width:380px;
+    font-size:13.5px; line-height:1.55; color:var(--ink-soft);
+    animation:fadeIn 1.2s .6s ease both;
+  }
+
+  /* Language Switcher Bar */
+  .lang-bar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:14px;
+    width:100%;
+    max-width:520px;
+    padding:4px;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+    border-radius:999px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    overflow-x:auto;
+    scrollbar-width:none;
+    animation:fadeIn 1.2s .4s ease both;
+  }
+  .lang-bar::-webkit-scrollbar{ display:none; }
+
+  .lang-chip{
+    position:relative;
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12px;
+    padding:6px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .25s var(--ease);
+  }
+  .lang-chip:hover{ color:var(--gold-hi); background:rgba(216,178,106,.08); }
+  .lang-chip.active{
+    color:#120a09;
+    font-weight:500;
+    background:linear-gradient(120deg,var(--gold-hi),var(--gold));
+    box-shadow:0 4px 14px -4px rgba(216,178,106,.7);
+  }
+
+  /* Stage & Card */
+  .stage{
+    width:100%; max-width:520px;
+    perspective:1200px;
+    animation:card-in 1.2s .55s var(--ease) both;
+  }
+  @keyframes card-in{
+    from{ opacity:0; transform:translateY(34px) scale(.965); filter:blur(6px); }
+    to{ opacity:1; transform:none; filter:blur(0); }
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:26px;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 44px 100px -48px rgba(0,0,0,.95), 0 0 0 1px rgba(255,255,255,.015), inset 0 1px 0 rgba(255,255,255,.09);
+    overflow:hidden;
+    transition:transform .6s var(--ease), box-shadow .6s;
+    will-change:transform;
+  }
+
+  .card::after, .modal-card::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+    background:conic-gradient(from var(--ang), transparent 0 68%, rgba(216,178,106,.85) 84%, var(--gold-hi) 88%, transparent 96%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation:spin 8s linear infinite;
+  }
+  @keyframes spin{ to{ --ang:360deg; } }
+
+  .spot{
+    position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .5s;
+    background:radial-gradient(360px circle at var(--mx,50%) var(--my,0%), rgba(240,216,164,.11), transparent 62%);
+  }
+  .card:hover .spot{ opacity:1; }
+
+  .bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 20px; border-bottom:1px solid var(--line);
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .mono{
+    position:relative; width:32px; height:32px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-style:italic; font-size:18px; color:var(--gold-hi);
+    background:rgba(216,178,106,.09); border:1px solid rgba(216,178,106,.22);
+  }
+  .mono::before{
+    content:""; position:absolute; inset:-3px; border-radius:50%; padding:1.5px;
+    background:conic-gradient(from var(--ang), transparent 0 55%, var(--gold) 90%, transparent);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation:spin 5s linear infinite;
+  }
+  .card.busy .mono::before{ animation-duration:1.2s; }
+  .bar .title{ font-family:var(--serif); font-size:18px; font-weight:500; letter-spacing:.03em; }
+
+  .status{display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-faint); transition:color .4s;}
+  .status .dot{width:7px; height:7px; border-radius:50%; background:var(--cardamom); transition:background .4s;}
+  .status.ready .dot{ animation:breathe 3.2s ease-in-out infinite; }
+  .status.busy{ color:var(--ink-soft); }
+  .status.busy .dot{background:var(--gold); animation:ping 1.3s ease-out infinite;}
+  .status.error .dot{background:#c45468;}
+  @keyframes ping{
+    0%{box-shadow:0 0 0 0 rgba(216,178,106,.55);}
+    70%{box-shadow:0 0 0 8px rgba(216,178,106,0);}
+    100%{box-shadow:0 0 0 0 rgba(216,178,106,0);}
+  }
+  @keyframes breathe{
+    0%,100%{box-shadow:0 0 0 0 rgba(111,146,115,.5);}
+    50%{box-shadow:0 0 0 5px rgba(111,146,115,0);}
+  }
+
+  /* Conversation */
+  #log{
+    height:clamp(290px, 46vh, 370px); overflow-y:auto; scroll-behavior:smooth;
+    padding:20px; display:flex; flex-direction:column; gap:11px;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 14px), transparent 100%);
+            mask-image:linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 14px), transparent 100%);
+  }
+  #log::-webkit-scrollbar{width:5px;}
+  #log::-webkit-scrollbar-thumb{background:rgba(244,236,225,.14); border-radius:99px;}
+
+  .msg{
+    max-width:84%; padding:11px 16px; font-size:14px; line-height:1.6;
+    border-radius:18px; white-space:pre-wrap; overflow-wrap:anywhere;
+  }
+  .msg .hid{ visibility:hidden; }
+
+  .msg.bot{
+    align-self:flex-start; border-bottom-left-radius:5px;
+    background:rgba(255,255,255,.055); border:1px solid var(--line);
+    transform-origin:left bottom;
+    animation:in-bot .7s var(--ease) both;
+  }
+  .msg.user{
+    align-self:flex-end; border-bottom-right-radius:5px;
+    background:linear-gradient(135deg,var(--maroon),var(--maroon-deep));
+    border:1px solid rgba(216,178,106,.26);
+    color:#fdf6ec;
+    transform-origin:right bottom;
+    animation:in-user .55s var(--ease) both;
+  }
+  @keyframes in-bot{
+    from{ opacity:0; transform:translate(-14px,12px) scale(.94); filter:blur(4px); }
+    to{ opacity:1; transform:none; filter:blur(0); }
+  }
+  @keyframes in-user{
+    from{ opacity:0; transform:translate(22px,10px) scale(.9); filter:blur(3px); }
+    to{ opacity:1; transform:none; filter:blur(0); }
+  }
+
+  .msg.typing-now .vis::after{
+    content:""; display:inline-block; width:1.5px; height:1em; margin-left:2px; vertical-align:-2px;
+    background:var(--gold); animation:caret .8s steps(1) infinite;
+  }
+  @keyframes caret{ 50%{ opacity:0; } }
+
+  .typing{
+    align-self:flex-start; display:inline-flex; gap:5px;
+    padding:15px 17px; border-radius:18px; border-bottom-left-radius:5px;
+    background:rgba(255,255,255,.055); border:1px solid var(--line);
+    animation:in-bot .5s var(--ease) both;
+  }
+  .typing i{width:6px; height:6px; border-radius:50%; background:var(--gold); opacity:.5; animation:bob 1.1s infinite;}
+  .typing i:nth-child(2){animation-delay:.15s;}
+  .typing i:nth-child(3){animation-delay:.3s;}
+  @keyframes bob{
+    0%,60%,100%{transform:translateY(0) scale(1); opacity:.4;}
+    30%{transform:translateY(-5px) scale(1.15); opacity:1;}
+  }
+
+  /* Start reservation button */
+  .start-row{
+    padding:0 20px 16px; display:flex; justify-content:center;
+    max-height:90px; transition:max-height .6s var(--ease), padding .6s var(--ease), opacity .4s, transform .5s var(--ease);
+  }
+  .start-row.hidden{ max-height:0; padding-top:0; padding-bottom:0; opacity:0; transform:translateY(10px); pointer-events:none; overflow:hidden; }
+
+  .fx{ position:relative; overflow:hidden; }
+  .ripple{
+    position:absolute; border-radius:50%; pointer-events:none;
+    background:rgba(255,255,255,.35); transform:scale(0);
+    animation:ripple .7s ease-out forwards;
+  }
+  @keyframes ripple{ to{ transform:scale(1); opacity:0; } }
+
+  .reserve{
+    border:1px solid rgba(216,178,106,.5);
+    background:linear-gradient(120deg, rgba(216,178,106,.18), rgba(216,178,106,.06));
+    color:var(--gold-hi);
+    font-family:var(--serif); font-size:18px; font-weight:500; letter-spacing:.04em;
+    padding:12px 34px 13px; border-radius:999px; cursor:pointer;
+    transition:transform .25s var(--ease), box-shadow .35s, border-color .35s;
+    animation:call 3.4s 2.6s ease-in-out infinite;
+  }
+  .reserve::before{
+    content:""; position:absolute; top:0; bottom:0; left:-60%; width:40%;
+    background:linear-gradient(100deg, transparent, rgba(255,240,205,.32), transparent);
+    transform:skewX(-20deg);
+    animation:glint 4.2s 2.8s ease-in-out infinite;
+  }
+  @keyframes glint{
+    0%{ left:-60%; }
+    38%,100%{ left:140%; }
+  }
+  @keyframes call{
+    0%,100%{ box-shadow:0 0 0 0 rgba(216,178,106,.35); }
+    50%{ box-shadow:0 0 0 12px rgba(216,178,106,0); }
+  }
+  .reserve:hover{ border-color:var(--gold); box-shadow:0 14px 34px -14px rgba(216,178,106,.65); animation:none; }
+  .reserve:active{ transform:scale(.96); }
+
+  /* Composer input */
+  .composer{
+    border-top:1px solid var(--line);
+    padding:14px 16px;
+    display:flex; align-items:center; gap:10px;
+    transition:opacity .6s, filter .6s;
+  }
+  .card.done .composer{ opacity:.5; filter:saturate(.4); }
+
+  #textInput{
+    flex:1; min-width:0;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:999px; padding:12px 18px;
+    color:var(--ink); font-family:inherit; font-size:14px; font-weight:300;
+    outline:none; transition:border-color .3s, background .3s, box-shadow .4s;
+  }
+  #textInput::placeholder{color:var(--ink-faint);}
+  #textInput:focus{
+    border-color:rgba(216,178,106,.55); background:rgba(255,255,255,.065);
+    box-shadow:0 0 0 4px rgba(216,178,106,.09), 0 10px 30px -14px rgba(216,178,106,.5);
+  }
+  #textInput:disabled{opacity:0.45; cursor:not-allowed;}
+
+  button.round{
+    width:44px; height:44px; flex-shrink:0;
+    border-radius:50%; border:1px solid var(--line);
+    display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; background:rgba(255,255,255,.05); color:var(--ink);
+    transition:transform .25s var(--ease), background .3s, border-color .3s, box-shadow .3s;
+  }
+  button.round:hover:not(:disabled){ border-color:rgba(216,178,106,.5); background:rgba(216,178,106,.1); }
+  button.round:active:not(:disabled){ transform:scale(.9); }
+  button.round:disabled{opacity:0.35; cursor:not-allowed;}
+  #sendBtn{background:linear-gradient(135deg,var(--maroon),var(--maroon-deep)); border-color:rgba(216,178,106,.32); color:#fdf6ec;}
+  #sendBtn:hover:not(:disabled){ background:linear-gradient(135deg,#8c2a3b,var(--maroon-deep)); box-shadow:0 10px 24px -10px rgba(122,34,49,.9); }
+  #sendBtn svg.plane{ display:block; }
+  #sendBtn.fly svg.plane{ animation:fly .7s var(--ease); }
+  @keyframes fly{
+    0%{ transform:none; opacity:1; }
+    42%{ transform:translate(18px,-18px) scale(.6); opacity:0; }
+    43%{ transform:translate(-18px,18px) scale(.6); opacity:0; }
+    100%{ transform:none; opacity:1; }
+  }
+
+  #micBtn .wave{ display:none; align-items:center; gap:3px; height:18px; }
+  #micBtn .wave i{ width:3px; height:6px; border-radius:2px; background:currentColor; animation:eq .9s ease-in-out infinite; }
+  #micBtn .wave i:nth-child(2){ animation-delay:.12s; }
+  #micBtn .wave i:nth-child(3){ animation-delay:.24s; }
+  #micBtn .wave i:nth-child(4){ animation-delay:.36s; }
+  @keyframes eq{ 0%,100%{ height:5px; } 50%{ height:17px; } }
+  #micBtn.listening .mic-ico{ display:none; }
+  #micBtn.listening .wave{ display:inline-flex; }
+  #micBtn.listening{
+    background:linear-gradient(135deg,var(--gold),#c1954c); color:#1a110c; border-color:transparent;
+    animation:halo 1.5s ease-out infinite;
+  }
+  @keyframes halo{
+    0%{box-shadow:0 0 0 0 rgba(216,178,106,.5);}
+    70%{box-shadow:0 0 0 14px rgba(216,178,106,0);}
+    100%{box-shadow:0 0 0 0 rgba(216,178,106,0);}
+  }
+
+  .footnote{
+    margin-top:18px; font-family:var(--serif); font-style:italic; font-size:15px; letter-spacing:.04em;
+    color:var(--ink-faint); text-align:center;
+    animation:fadeIn 1.4s 1.4s ease both;
+  }
+
+  /* Modal styling */
+  .modal-backdrop{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(0,0,0,0.82);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; pointer-events:none; visibility:hidden;
+    transition:opacity .45s ease, visibility 0s .45s;
+  }
+  .modal-backdrop.active{ opacity:1; pointer-events:auto; visibility:visible; transition:opacity .45s ease; }
+
+  .modal-card{
+    position:relative;
+    background:linear-gradient(180deg, #1f1415, #120c0d);
+    border:1px solid rgba(216,178,106,.28);
+    border-radius:26px;
+    padding:34px 24px 26px;
+    width:100%; max-width:420px;
+    text-align:center;
+    box-shadow:0 35px 80px rgba(0,0,0,.9), 0 0 90px -30px rgba(216,178,106,.35);
+    opacity:0; transform:translateY(24px) scale(.94); filter:blur(6px);
+    transition:transform .7s var(--ease), opacity .5s, filter .6s;
+  }
+  .modal-backdrop.active .modal-card{ opacity:1; transform:none; filter:blur(0); }
+
+  .spark{
+    position:absolute; width:6px; height:6px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, var(--gold-hi), var(--gold)); box-shadow:0 0 10px rgba(240,216,164,.9);
+  }
+
+  .modal-badge{
+    position:relative;
+    width:64px; height:64px; margin:0 auto 18px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--gold-hi);
+  }
+  .modal-badge::before{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    background:radial-gradient(circle, rgba(216,178,106,.28), rgba(216,178,106,.06) 70%);
+    transform:scale(0);
+  }
+  .modal-backdrop.active .modal-badge::before{ animation:pop-badge .8s .2s var(--ease) forwards; }
+  @keyframes pop-badge{ to{ transform:scale(1); } }
+  .modal-badge svg{ position:relative; overflow:visible; }
+  .modal-badge .ring{ stroke-dasharray:176; stroke-dashoffset:176; }
+  .modal-badge .tick{ stroke-dasharray:34; stroke-dashoffset:34; }
+  .modal-backdrop.active .modal-badge .ring{ animation:stroke .9s .25s cubic-bezier(.65,0,.35,1) forwards; }
+  .modal-backdrop.active .modal-badge .tick{ animation:stroke .5s .95s cubic-bezier(.65,0,.35,1) forwards; }
+  @keyframes stroke{ to{ stroke-dashoffset:0; } }
+
+  .modal-card h2{
+    font-family:var(--serif);
+    font-size:28px; margin:0 0 8px;
+    color:var(--gold-hi); font-weight:500; letter-spacing:.01em;
+  }
+  .modal-card .lead{ font-size:13.5px; color:var(--ink-soft); margin:0; line-height:1.6; }
+  .modal-card h2, .modal-card .lead{ opacity:0; }
+  .modal-backdrop.active .modal-card h2{ animation:rise-in .8s .55s var(--ease) forwards; }
+  .modal-backdrop.active .modal-card .lead{ animation:rise-in .8s .68s var(--ease) forwards; }
+  @keyframes rise-in{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+
+  .modal-summary{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:16px; padding:8px 18px; margin:20px 0 0;
+    font-size:13.5px; text-align:left; color:var(--ink-soft);
+  }
+  .modal-summary .row{
+    display:flex; justify-content:space-between; gap:16px; padding:10px 0;
+    border-bottom:1px solid var(--line); opacity:0;
+  }
+  .modal-summary .row:last-child{ border-bottom:0; }
+  .modal-summary .k{ color:var(--ink-faint); flex-shrink:0; }
+  .modal-summary .v{ color:var(--ink); font-weight:400; text-align:right; overflow-wrap:anywhere; }
+  .modal-backdrop.active .modal-summary .row{ animation:rise-in .7s calc(.85s + var(--i) * .09s) var(--ease) forwards; }
+
+  .modal-actions{ display:flex; flex-direction:column; gap:10px; margin-top:22px; opacity:0; }
+  .modal-backdrop.active .modal-actions{ animation:rise-in .8s 1.3s var(--ease) forwards; }
+
+  .btn-wa{
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    background:#25D366; color:#0b2415; text-decoration:none;
+    font-weight:600; font-size:14px; letter-spacing:.02em;
+    padding:14px 20px; border-radius:999px;
+    transition:transform .25s var(--ease), box-shadow .3s, filter .3s;
+  }
+  .btn-wa:hover{ filter:brightness(1.07); box-shadow:0 14px 30px -12px rgba(37,211,102,.7); }
+  .btn-wa:active{ transform:scale(.97); }
+
+  .btn-close{
+    background:transparent; border:1px solid var(--line);
+    color:var(--ink-faint); font-family:inherit; font-size:13px;
+    padding:11px; border-radius:999px; cursor:pointer;
+    transition:color .3s, border-color .3s, transform .25s var(--ease);
+  }
+  .btn-close:hover{ color:var(--ink); border-color:var(--gold); }
+  .btn-close:active{ transform:scale(.97); }
+
+  @media (max-width:480px){
+    .msg{ max-width:88%; }
+    .modal-card{ padding:30px 18px 22px; }
+    .lang-bar{ justify-content:flex-start; padding:4px 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms !important; animation-iteration-count:1 !important;
+      animation-delay:0s !important; transition-duration:.01ms !important;
+    }
+    #embers{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"></div>
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="masthead">
+  <div class="crest">The Spice Bistro</div>
+  <h1 id="uiTitle">Reserve your table</h1>
+  <p id="uiSubtitle">Tell us the date, the hour and how many will be joining you. We'll hold the table.</p>
+</header>
+
+<!-- Language Switcher -->
+<nav class="lang-bar" id="langBar" aria-label="Select Language">
+  <button type="button" class="lang-chip active" data-lang="en">English</button>
+  <button type="button" class="lang-chip" data-lang="ta">தமிழ்</button>
+  <button type="button" class="lang-chip" data-lang="ml">മലയാളം</button>
+  <button type="button" class="lang-chip" data-lang="te">తెలుగు</button>
+  <button type="button" class="lang-chip" data-lang="kn">ಕನ್ನಡ</button>
+  <button type="button" class="lang-chip" data-lang="hi">हिन्दी</button>
+</nav>
+
+<div class="stage" id="stage">
+  <main class="card" id="card">
+    <span class="spot" aria-hidden="true"></span>
+
+    <div class="bar">
+      <div class="brand">
+        <span class="mono" aria-hidden="true">S</span>
+        <div class="title" id="uiBarTitle">Reservations</div>
+      </div>
+      <div class="status ready" id="status"><span class="dot"></span><span id="statusText">Ready</span></div>
+    </div>
+
+    <div id="log" aria-live="polite"></div>
+    <div class="sr" id="sr" aria-live="polite"></div>
+
+    <div class="start-row" id="startRow">
+      <button type="button" class="reserve fx mag" id="reserveBtn">Begin reservation</button>
+    </div>
+
+    <div class="composer">
+      <button type="button" class="round fx" id="micBtn" title="Speak" aria-label="Speak your reply">
+        <svg class="mic-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" stroke="currentColor" stroke-width="1.6"/><path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </button>
+      <input type="text" id="textInput" placeholder="Type your reply…" autocomplete="off" aria-label="Your reply">
+      <button type="button" class="round fx" id="sendBtn" title="Send" aria-label="Send">
+        <svg class="plane" width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7-7-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </main>
+</div>
+
+<div class="footnote" id="uiFootnote">Open daily, 11:30 to 23:00</div>
+
+<!-- Confirmation Popup Modal -->
+<div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card" id="modalCard">
+    <div class="modal-badge" id="modalBadge">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle class="ring" cx="32" cy="32" r="28" transform="rotate(-90 32 32)"/>
+        <path class="tick" d="M21 33l8 8 15-17"/>
+      </svg>
+    </div>
+    <h2 id="modalTitle">Reservation Confirmed</h2>
+    <p class="lead" id="modalLead">Send the details to the restaurant desk to finish.</p>
+
+    <div class="modal-summary" id="modalSummary"></div>
+
+    <div class="modal-actions">
+      <a href="#" target="_blank" rel="noopener" class="btn-wa fx mag" id="waLink">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm5.78 14.07c-.24.68-1.41 1.26-1.95 1.33-.51.07-1.18.1-3.41-.82-2.85-1.18-4.68-4.08-4.82-4.27-.14-.19-1.15-1.53-1.15-2.92 0-1.39.73-2.07 1-2.35.24-.28.53-.35.71-.35.18 0 .36 0 .52.01.17.01.4.06.62.53.24.57.8 1.95.87 2.1.07.14.12.31.02.5-.1.19-.15.31-.3.49-.14.17-.31.38-.44.51-.14.14-.29.29-.12.58.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.27 2.3 1.41.29.14.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.38-.24.64-.14.26.1 1.64.77 1.92.91.29.14.48.21.55.33.07.12.07.69-.17 1.37z"/></svg>
+        <span id="waBtnText">Send to Restaurant (WhatsApp)</span>
+      </a>
+      <button type="button" class="btn-close fx" id="closeModalBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==========================================================
+  // CONFIGURATION & MULTILINGUAL LOCALIZATION
+  // ==========================================================
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzaETiMHBwIH_x79OwEvCB0Aw3A19d_SKZgSPlej_oIkReTHpd5Bmw30FA-P5yIF0Y7/exec";
+  const RESTAURANT_WHATSAPP_NUMBER = "917019743880";
+
+  const I18N_UI = {
+    en: {
+      locale: "en-US",
+      title: "Reserve your table",
+      subtitle: "Tell us the date, the hour and how many will be joining you. We'll hold the table.",
+      barTitle: "Reservations",
+      ready: "Ready",
+      busy: "Checking",
+      offline: "Offline",
+      closed: "Closed",
+      beginBtn: "Begin reservation",
+      placeholder: "Type your reply…",
+      footnote: "Open daily, 11:30 to 23:00",
+      greeting: "Good day, and welcome to The Spice Bistro. I can hold a table for you — shall we begin?",
+      errorMsg: "I couldn't reach our reservations desk just now. Please try again in a moment.",
+      modalTitle: "Reservation Confirmed",
+      modalLead: "Send the details to the restaurant desk to finish.",
+      modalLabels: { name: "Name", guests: "Guests", datetime: "Date & time", phone: "Phone" },
+      waBtn: "Send to Restaurant (WhatsApp)",
+      closeBtn: "Done",
+      waTemplate: (b) => 
+        `*New Table Reservation*\n\n` +
+        `Hello The Spice Bistro team,\n` +
+        `I would like to confirm my table reservation:\n\n` +
+        `• *Name:* ${b.name}\n` +
+        `• *Guests:* ${b.guests}\n` +
+        `• *Date & Time:* ${b.datetime}\n` +
+        `• *Contact:* ${b.phone}\n\n` +
+        `Thank you!`
+    },
+    ta: {
+      locale: "ta-IN",
+      title: "மேஜை முன்பதிவு",
+      subtitle: "தேதி, நேரம் மற்றும் எத்தனை நபர்கள் என்று கூறுங்கள். உங்களுக்கான மேஜை தயாராக இருக்கும்.",
+      barTitle: "முன்பதிவு மையம்",
+      ready: "தயார்",
+      busy: "சரிபார்க்கிறது",
+      offline: "இணைப்பு இல்லை",
+      closed: "முடிந்தது",
+      beginBtn: "முன்பதிவு தொடங்கவும்",
+      placeholder: "பதிலைத் தட்டச்சு செய்யவும்…",
+      footnote: "தினமும் திறந்திருக்கும்: 11:30 முதல் 23:00 வரை",
+      greeting: "தி ஸ்பைஸ் பிஸ்ட்ரோவிற்கு நல்வரவு! உங்களுக்காக ஒரு மேஜையை பதிவு செய்யலாமா?",
+      errorMsg: "தற்போது முன்பதிவு மேசையை தொடர்பு கொள்ள முடியவில்லை. தயவுசெய்து சிறிது நேரம் கழித்து முயற்சிக்கவும்.",
+      modalTitle: "முன்பதிவு உறுதியானது",
+      modalLead: "விவரங்களை உணவக வாட்ஸ்அப் எண்ணிற்கு அனுப்பி உறுதிப்படுத்தவும்.",
+      modalLabels: { name: "பெயர்", guests: "நபர்கள்", datetime: "தேதி & நேரம்", phone: "தொலைபேசி" },
+      waBtn: "உணவகத்திற்கு அனுப்பவும் (WhatsApp)",
+      closeBtn: "சரி",
+      waTemplate: (b) => 
+        `*புதிய மேஜை முன்பதிவு*\n\n` +
+        `வணக்கம் தி ஸ்பைஸ் பிஸ்ட்ரோ குழு,\n` +
+        `எனது மேஜை முன்பதிவை உறுதிப்படுத்த விரும்புகிறேன்:\n\n` +
+        `• *பெயர்:* ${b.name}\n` +
+        `• *நபர்கள்:* ${b.guests}\n` +
+        `• *தேதி & நேரம்:* ${b.datetime}\n` +
+        `• *தொடர்பு எண்:* ${b.phone}\n\n` +
+        `நன்றி!`
+    },
+    ml: {
+      locale: "ml-IN",
+      title: "ടേബിൾ ബുക്ക് ചെയ്യാം",
+      subtitle: "തീയതിയും സമയവും എത്ര പേരുണ്ടെന്നും അറിയിക്കുക. ഞങ്ങൾ ടേബിൾ ഒരുക്കിവെക്കാം.",
+      barTitle: "റിസർവേഷൻ",
+      ready: "സജ്ജമാണ്",
+      busy: "പരിശോധിക്കുന്നു",
+      offline: "ഓഫ്‌ലൈൻ",
+      closed: "പൂർത്തിയായി",
+      beginBtn: "ബുക്കിംഗ് ആരംഭിക്കുക",
+      placeholder: "നിങ്ങളുടെ മറുപടി നൽകുക…",
+      footnote: "എല്ലാ ദിവസവും തുറന്നിരിക്കുന്നു: 11:30 മുതൽ 23:00 വരെ",
+      greeting: "ദ സ്പൈസ് ബിസ്ട്രോയിലേക്ക് സ്വാഗതം! താങ്കൾക്കായി ഒരു ടേബിൾ ബുക്ക് ചെയ്യണമോ?",
+      errorMsg: "റിസർവേഷൻ ഡെസ്കുമായി ബന്ധപ്പെടാൻ കഴിഞ്ഞില്ല. ദയവായി അല്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക.",
+      modalTitle: "ബുക്കിംഗ് സ്ഥിരീകരിച്ചു",
+      modalLead: "വിവരങ്ങൾ റെസ്റ്റോറൻ്റ് ഡെസ്കിലേക്ക് അയച്ച് ബുക്കിംഗ് പൂർത്തിയാക്കുക.",
+      modalLabels: { name: "പേര്", guests: "ആളുകൾ", datetime: "തീയതി & സമയം", phone: "ഫോൺ" },
+      waBtn: "വാട്സാപ്പിൽ അയക്കുക (WhatsApp)",
+      closeBtn: "പൂർത്തിയായി",
+      waTemplate: (b) => 
+        `*പുതിയ ടേബിൾ റിസർവേഷൻ*\n\n` +
+        `ഹലോ സ്പൈസ് ബിസ്ട്രോ ടീം,\n` +
+        `എന്റെ ടേബിൾ ബുക്കിംഗ് സ്ഥിരീകരിക്കാൻ ആഗ്രഹിക്കുന്നു:\n\n` +
+        `• *പേര്:* ${b.name}\n` +
+        `• *ആളുകൾ:* ${b.guests}\n` +
+        `• *തീയതി & സമയം:* ${b.datetime}\n` +
+        `• *ഫോൺ:* ${b.phone}\n\n` +
+        `നന്ദി!`
+    },
+    te: {
+      locale: "te-IN",
+      title: "టేబుల్ బుకింగ్",
+      subtitle: "తేదీ, సమయం మరియు ఎంతమంది అతిథులో తెలియజేయండి. మీ టేబుల్ సిద్ధంగా ఉంటుంది.",
+      barTitle: "రిజర్వేషన్లు",
+      ready: "సిద్ధంగా ఉంది",
+      busy: "పరిశీలిస్తోంది",
+      offline: "ఆఫ్‌లైన్",
+      closed: "పూర్తయింది",
+      beginBtn: "బుకింగ్ ప్రారంభించండి",
+      placeholder: "మీ సమాధానాన్ని టైప్ చేయండి…",
+      footnote: "ప్రతిరోజూ తెరిచి ఉంటుంది: 11:30 నుండి 23:00 వరకు",
+      greeting: "ది స్పైస్ బిస్ట్రోకి స్వాగతం! మీ కోసం టేబుల్ రిజర్వ్ చేయాలా?",
+      errorMsg: "రిజర్వేషన్ డెస్క్‌తో కనెక్ట్ కాలేకపోయాము. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి.",
+      modalTitle: "బుకింగ్ ఖరారైంది",
+      modalLead: "పూర్తి చేయడానికి వివరాలను రెస్టారెంట్ డెస్క్‌కు పంపండి.",
+      modalLabels: { name: "పేరు", guests: "అతిథులు", datetime: "తేదీ & సమయం", phone: "ఫోన్" },
+      waBtn: "వాట్సాప్‌లో పంపండి (WhatsApp)",
+      closeBtn: "పూర్తి",
+      waTemplate: (b) => 
+        `*కొత్త టేబుల్ రిజర్వేషన్*\n\n` +
+        `నమస్తే ది స్పైస్ బిస్ట్రో బృందం,\n` +
+        `నా టేబుల్ రిజర్వేషన్‌ను నిర్ధారించాలనుకుంటున్నాను:\n\n` +
+        `• *పేరు:* ${b.name}\n` +
+        `• *అతిథులు:* ${b.guests}\n` +
+        `• *తేదీ & సమయం:* ${b.datetime}\n` +
+        `• *ఫోన్ నంబర్:* ${b.phone}\n\n` +
+        `ధన్యవాదాలు!`
+    },
+    kn: {
+      locale: "kn-IN",
+      title: "ಟೇಬಲ್ ಬುಕ್ ಮಾಡಿ",
+      subtitle: "ದಿನಾಂಕ, ಸಮಯ ಮತ್ತು ಎಷ್ಟು ಜನ ಬರುತ್ತೀರಿ ಎಂದು ತಿಳಿಸಿ. ನಾವು ಟೇಬಲ್ ಕಾಯ್ದಿರಿಸುತ್ತೇವೆ.",
+      barTitle: "ಬುಕಿಂಗ್ ವಿಭಾಗ",
+      ready: "ಸಿದ್ಧವಾಗಿದೆ",
+      busy: "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ",
+      offline: "ಆಫ್‌ಲೈನ್",
+      closed: "ಮುಕ್ತಾಯಗೊಂಡಿದೆ",
+      beginBtn: "ಬುಕಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ",
+      placeholder: "ನಿಮ್ಮ ಉತ್ತರವನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ…",
+      footnote: "ಪ್ರತಿದಿನ ತೆರೆದಿರುತ್ತದೆ: 11:30 ರಿಂದ 23:00 ರವರೆಗೆ",
+      greeting: "ದಿ ಸ್ಪೈಸ್ ಬಿಸ್ಟ್ರೋಗೆ ಸುಸ್ವಾಗತ! ನಿಮಗಾಗಿ ಟೇಬಲ್ ಬುಕ್ ಮಾಡಬೇಕೇ?",
+      errorMsg: "ಬುಕಿಂಗ್ ಡೆಸ್ಕ್ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+      modalTitle: "ಬುಕಿಂಗ್ ಖಚಿತವಾಗಿದೆ",
+      modalLead: "ವಿವರಗಳನ್ನು ರೆಸ್ಟೋರೆಂಟ್‌ಗೆ ವಾಟ್ಸಾಪ್ ಮೂಲಕ ಕಳುಹಿಸಿ ಮುಕ್ತಾಯಗೊಳಿಸಿ.",
+      modalLabels: { name: "ಹೆಸರು", guests: "ಜನರು", datetime: "ದಿನಾಂಕ & ಸಮಯ", phone: "ದೂರವಾಣಿ" },
+      waBtn: "ರೆಸ್ಟೋರೆಂಟ್‌ಗೆ ಕಳುಹಿಸಿ (WhatsApp)",
+      closeBtn: "ಮುಗಿಯಿತು",
+      waTemplate: (b) => 
+        `*ಹೊಸ ಟೇಬಲ್ ಬುಕಿಂಗ್*\n\n` +
+        `ನಮಸ್ಕಾರ ದಿ ಸ್ಪೈಸ್ ಬಿಸ್ಟ್ರೋ ತಂಡ,\n` +
+        `ನನ್ನ ಟೇಬಲ್ ಬುಕಿಂಗ್ ಅನ್ನು ಖಚಿತಪಡಿಸಲು ಬಯಸುತ್ತೇನೆ:\n\n` +
+        `• *ಹೆಸರು:* ${b.name}\n` +
+        `• *ಜನರು:* ${b.guests}\n` +
+        `• *ದಿನಾಂಕ & ಸಮಯ:* ${b.datetime}\n` +
+        `• *ಮೊಬೈಲ್:* ${b.phone}\n\n` +
+        `ಧನ್ಯವಾದಗಳು!`
+    },
+    hi: {
+      locale: "hi-IN",
+      title: "अपनी टेबल बुक करें",
+      subtitle: "तारीख, समय और मेहमानों की संख्या बताएं। हम आपकी टेबल तैयार रखेंगे।",
+      barTitle: "टेबल बुकिंग",
+      ready: "तैयार",
+      busy: "जांच जारी है",
+      offline: "ऑफ़लाइन",
+      closed: "समाप्त",
+      beginBtn: "बुकिंग शुरू करें",
+      placeholder: "अपना उत्तर टाइप करें…",
+      footnote: "प्रतिदिन खुला: 11:30 से 23:00 बजे तक",
+      greeting: "द स्पाइस बिस्ट्रो में आपका स्वागत है! क्या आप टेबल बुक करना चाहेंगे?",
+      errorMsg: "बुकिंग काउंटर से संपर्क नहीं हो पाया। कृपया कुछ क्षणों बाद पुनः प्रयास करें।",
+      modalTitle: "बुकिंग कन्फर्म हो गई",
+      modalLead: "बुकिंग पूरी करने के लिए विवरण रेस्तरां को व्हाट्सएप करें।",
+      modalLabels: { name: "नाम", guests: "मेहमान", datetime: "तारीख व समय", phone: "फ़ोन नंबर" },
+      waBtn: "व्हाट्सएप पर भेजें (WhatsApp)",
+      closeBtn: "पूर्ण",
+      waTemplate: (b) => 
+        `*नई टेबल बुकिंग*\n\n` +
+        `नमस्ते द स्पाइस बिस्ट्रो टीम,\n` +
+        `मैं अपनी टेबल बुकिंग कन्फर्म करना चाहता/चाहती हूँ:\n\n` +
+        `• *नाम:* ${b.name}\n` +
+        `• *मेहमान:* ${b.guests}\n` +
+        `• *तारीख व समय:* ${b.datetime}\n` +
+        `• *फ़ोन नंबर:* ${b.phone}\n\n` +
+        `धन्यवाद!`
+    }
+  };
+
+  let currentLang = "en";
+  let state = "idle";
+  let context = {};
+  let cbCounter = 0;
+  let lastBooking = null;
+
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const FINE_POINTER = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  // DOM Elements
+  const logEl         = document.getElementById("log");
+  const srEl          = document.getElementById("sr");
+  const textInput     = document.getElementById("textInput");
+  const sendBtn       = document.getElementById("sendBtn");
+  const micBtn        = document.getElementById("micBtn");
+  const statusEl      = document.getElementById("status");
+  const statusText    = document.getElementById("statusText");
+  const startRow      = document.getElementById("startRow");
+  const reserveBtn    = document.getElementById("reserveBtn");
+  const confirmModal  = document.getElementById("confirmModal");
+  const modalCard     = document.getElementById("modalCard");
+  const modalBadge    = document.getElementById("modalBadge");
+  const modalSummary  = document.getElementById("modalSummary");
+  const waLink        = document.getElementById("waLink");
+  const waBtnText     = document.getElementById("waBtnText");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const cardEl        = document.getElementById("card");
+  const langBar       = document.getElementById("langBar");
+
+  const uiTitle       = document.getElementById("uiTitle");
+  const uiSubtitle    = document.getElementById("uiSubtitle");
+  const uiBarTitle    = document.getElementById("uiBarTitle");
+  const uiFootnote    = document.getElementById("uiFootnote");
+  const modalTitle    = document.getElementById("modalTitle");
+  const modalLead     = document.getElementById("modalLead");
+
+  // Apply Language to UI
+  function setLanguage(lang) {
+    if (!I18N_UI[lang]) lang = "en";
+    currentLang = lang;
+
+    const data = I18N_UI[lang];
+    uiTitle.textContent = data.title;
+    uiSubtitle.textContent = data.subtitle;
+    uiBarTitle.textContent = data.barTitle;
+    reserveBtn.textContent = data.beginBtn;
+    textInput.placeholder = data.placeholder;
+    uiFootnote.textContent = data.footnote;
+    modalTitle.textContent = data.modalTitle;
+    modalLead.textContent = data.modalLead;
+    waBtnText.textContent = data.waBtn;
+    closeModalBtn.textContent = data.closeBtn;
+
+    // Set Indic fonts when appropriate
+    if (lang === "ta") document.body.style.fontFamily = "var(--indic-tamil), var(--sans)";
+    else if (lang === "ml") document.body.style.fontFamily = "var(--indic-malayalam), var(--sans)";
+    else if (lang === "te") document.body.style.fontFamily = "var(--indic-telugu), var(--sans)";
+    else if (lang === "kn") document.body.style.fontFamily = "var(--indic-kannada), var(--sans)";
+    else document.body.style.fontFamily = "var(--sans)";
+
+    // Update active button state
+    document.querySelectorAll(".lang-chip").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+    });
+
+    if (recognizer) recognizer.lang = data.locale;
+
+    // Refresh greeting if still idle and no conversation has occurred
+    if (state === "idle" && logEl.querySelectorAll(".msg.user").length === 0) {
+      logEl.innerHTML = "";
+      addBotMessage(data.greeting);
+    }
+
+    // Refresh modal if active
+    if (lastBooking && confirmModal.classList.contains("active")) {
+      renderModalSummary(lastBooking);
+    }
+  }
+
+  langBar.addEventListener("click", (e) => {
+    const chip = e.target.closest(".lang-chip");
+    if (chip) {
+      const selectedLang = chip.getAttribute("data-lang");
+      setLanguage(selectedLang);
+    }
+  });
+
+  // ==========================================================
+  // CONVERSATIONAL MESSAGES & TYPEWRITER EFFECT
+  // ==========================================================
+  function addMessage(text, who){
+    const div = document.createElement("div");
+    div.className = "msg " + who;
+    div.textContent = text;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+    return div;
+  }
+
+  function addBotMessage(text){
+    return new Promise((resolve) => {
+      const div = document.createElement("div");
+      div.className = "msg bot";
+      logEl.appendChild(div);
+
+      if (REDUCED) {
+        div.textContent = text;
+        logEl.scrollTop = logEl.scrollHeight;
+        srEl.textContent = text;
+        return resolve();
+      }
+
+      const vis = document.createElement("span"); vis.className = "vis";
+      const hid = document.createElement("span"); hid.className = "hid";
+      hid.textContent = text;
+      div.append(vis, hid);
+      div.classList.add("typing-now");
+      logEl.scrollTop = logEl.scrollHeight;
+
+      const total = text.length;
+      const dur = Math.min(2200, Math.max(500, total * 16));
+      const t0 = performance.now();
+
+      (function frame(now){
+        const p = Math.min(1, (now - t0) / dur);
+        const n = Math.floor(total * p);
+        vis.textContent = text.slice(0, n);
+        hid.textContent = text.slice(n);
+        logEl.scrollTop = logEl.scrollHeight;
+        if (p < 1) { requestAnimationFrame(frame); }
+        else {
+          div.classList.remove("typing-now");
+          div.textContent = text;
+          srEl.textContent = text;
+          resolve();
+        }
+      })(t0);
+    });
+  }
+
+  function showTyping(){
+    const t = document.createElement("div");
+    t.className = "typing";
+    t.innerHTML = "<i></i><i></i><i></i>";
+    logEl.appendChild(t);
+    logEl.scrollTop = logEl.scrollHeight;
+    return t;
+  }
+
+  function setStatus(mode, labelKey){
+    statusEl.className = "status " + mode;
+    const label = (I18N_UI[currentLang] && I18N_UI[currentLang][labelKey]) || labelKey;
+    statusText.textContent = label;
+    cardEl.classList.toggle("busy", mode === "busy");
+  }
+
+  function speak(text){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = (I18N_UI[currentLang] && I18N_UI[currentLang].locale) || "en-US";
+      u.rate = 0.96;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, function(m){
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+
+  // ==========================================================
+  // CONFIRMATION POPUP & WHATSAPP
+  // ==========================================================
+  function burst(){
+    if (REDUCED) return;
+    const host = confirmModal.getBoundingClientRect();
+    const b = modalBadge.getBoundingClientRect();
+    const cx = b.left - host.left + b.width / 2;
+    const cy = b.top - host.top + b.height / 2;
+
+    for (let i = 0; i < 28; i++){
+      const s = document.createElement("span");
+      s.className = "spark";
+      const size = 3 + Math.random() * 5;
+      s.style.width = s.style.height = size + "px";
+      s.style.left = cx + "px";
+      s.style.top = cy + "px";
+      confirmModal.appendChild(s);
+
+      const angle = (Math.PI * 2 * i) / 28 + Math.random() * 0.4;
+      const dist = 70 + Math.random() * 120;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist + 24;
+
+      const anim = s.animate([
+        { transform: "translate(-50%,-50%) scale(1)", opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0)`, opacity: 0 }
+      ], { duration: 900 + Math.random() * 700, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+      anim.onfinish = () => s.remove();
+    }
+  }
+
+  function renderModalSummary(booking) {
+    const labels = I18N_UI[currentLang].modalLabels;
+    const rows = [
+      [labels.name, booking.name],
+      [labels.guests, booking.guests],
+      [labels.datetime, booking.datetime],
+      [labels.phone, booking.phone]
+    ];
+    modalSummary.innerHTML = rows.map((r, i) =>
+      `<div class="row" style="--i:${i}"><span class="k">${escapeHtml(r[0])}</span><span class="v">${escapeHtml(r[1])}</span></div>`
+    ).join("");
+
+    const waTemplateFn = I18N_UI[currentLang].waTemplate;
+    const waText = encodeURIComponent(waTemplateFn(booking));
+    waLink.href = `https://wa.me/${RESTAURANT_WHATSAPP_NUMBER}?text=${waText}`;
+  }
+
+  function showConfirmationPopup(booking) {
+    lastBooking = booking;
+    renderModalSummary(booking);
+    confirmModal.classList.add("active");
+    setTimeout(burst, 600);
+    setTimeout(() => { try { waLink.focus({ preventScroll: true }); } catch(e){} }, 850);
+  }
+
+  function closeConversation() {
+    confirmModal.classList.remove("active");
+    textInput.disabled = true;
+    textInput.placeholder = (I18N_UI[currentLang] && I18N_UI[currentLang].modalTitle) || "Reservation complete.";
+    sendBtn.disabled = true;
+    micBtn.disabled = true;
+    startRow.classList.add("hidden");
+    cardEl.classList.add("done");
+    setStatus("ready", "closed");
+  }
+
+  closeModalBtn.addEventListener("click", closeConversation);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && confirmModal.classList.contains("active")) closeConversation();
+  });
+
+  // ==========================================================
+  // BACKEND INTEGRATION (JSONP Cross-Domain Call)
+  // ==========================================================
+  function callBackend(text) {
+    return new Promise((resolve, reject) => {
+      const callbackName = "bistroCallback_" + Date.now() + "_" + (cbCounter++);
+      const script = document.createElement("script");
+      let isResolved = false;
+
+      window[callbackName] = function(data) {
+        isResolved = true;
+        cleanup();
+        resolve(data);
+      };
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      script.onerror = function() {
+        if (!isResolved) {
+          cleanup();
+          reject(new Error("Script loading error / Network offline"));
+        }
+      };
+
+      const queryParams = new URLSearchParams({
+        text: text,
+        state: state,
+        context: JSON.stringify(context),
+        lang: currentLang,
+        callback: callbackName
+      });
+
+      script.src = SCRIPT_URL + "?" + queryParams.toString();
+      document.head.appendChild(script);
+
+      setTimeout(() => {
+        if (!isResolved) {
+          cleanup();
+          reject(new Error("Backend timed out after 15s"));
+        }
+      }, 15000);
+    });
+  }
+
+  async function sendMessage(raw){
+    const text = (raw || "").trim();
+    if(!text) return;
+
+    startRow.classList.add("hidden");
+    addMessage(text, "user");
+    textInput.value = "";
+    setStatus("busy", "busy");
+    const typing = showTyping();
+
+    try{
+      const data = await callBackend(text);
+      typing.remove();
+      state   = data.nextState || "idle";
+      context = data.context || {};
+      setStatus("ready", "ready");
+      speak(data.reply);
+      await addBotMessage(data.reply);
+
+      if (data.isConfirmed && data.booking) {
+        setTimeout(() => {
+          showConfirmationPopup(data.booking);
+        }, 850);
+      }
+    }catch(err){
+      typing.remove();
+      console.error("Backend error:", err);
+      const errMsg = (I18N_UI[currentLang] && I18N_UI[currentLang].errorMsg) || "I couldn't reach our reservations desk just now.";
+      addMessage(errMsg, "bot");
+      setStatus("error", "offline");
+    }
+  }
+
+  function flySend(){
+    sendBtn.classList.remove("fly");
+    void sendBtn.offsetWidth;
+    sendBtn.classList.add("fly");
+  }
+
+  sendBtn.addEventListener("click", () => { flySend(); sendMessage(textInput.value); });
+  textInput.addEventListener("keydown", (e) => { if(e.key === "Enter"){ flySend(); sendMessage(textInput.value); } });
+  reserveBtn.addEventListener("click", () => {
+    const triggerWord = {
+      en: "Book a table",
+      ta: "பதிவு",
+      ml: "ബുക്ക്",
+      te: "బుక్",
+      kn: "ಬುಕ್",
+      hi: "बुक"
+    }[currentLang] || "Book a table";
+    sendMessage(triggerWord);
+  });
+
+  // ==========================================================
+  // SPEECH RECOGNITION (VOICE INPUT)
+  // ==========================================================
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null, listening = false;
+
+  if(SR){
+    recognizer = new SR();
+    recognizer.continuous = false;
+    recognizer.interimResults = false;
+    recognizer.lang = I18N_UI[currentLang].locale;
+
+    recognizer.onresult = (e) => sendMessage(e.results[0][0].transcript);
+    recognizer.onend = () => { listening = false; micBtn.classList.remove("listening"); };
+    recognizer.onerror = () => { listening = false; micBtn.classList.remove("listening"); };
+
+    micBtn.addEventListener("click", () => {
+      if(listening){ recognizer.stop(); return; }
+      try{
+        recognizer.lang = I18N_UI[currentLang].locale;
+        recognizer.start();
+        listening = true;
+        micBtn.classList.add("listening");
+      }catch(_){}
+    });
+  } else {
+    micBtn.disabled = true;
+    micBtn.style.opacity = ".35";
+    micBtn.title = "Voice recognition not available";
+  }
+
+  // ==========================================================
+  // MICRO-INTERACTIONS: TILT, POINTER LIGHT & RIPPLES
+  // ==========================================================
+  const pointer = { x: -9999, y: -9999 };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  window.addEventListener("pointermove", (e) => {
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    if (REDUCED || !FINE_POINTER) return;
+
+    const r = cardEl.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    cardEl.style.setProperty("--mx", (clamp(px, 0, 1) * 100).toFixed(1) + "%");
+    cardEl.style.setProperty("--my", (clamp(py, 0, 1) * 100).toFixed(1) + "%");
+
+    if (!confirmModal.classList.contains("active")) {
+      const rx = (clamp(py, -.3, 1.3) - .5) * -3.2;
+      const ry = (clamp(px, -.3, 1.3) - .5) * 4;
+      cardEl.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+    }
+  }, { passive: true });
+
+  document.addEventListener("pointerleave", () => {
+    pointer.x = pointer.y = -9999;
+    cardEl.style.transform = "";
+  });
+
+  if (!REDUCED && FINE_POINTER) {
+    document.querySelectorAll(".mag").forEach((el) => {
+      el.addEventListener("pointermove", (e) => {
+        const r = el.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) * 0.18;
+        const dy = (e.clientY - (r.top + r.height / 2)) * 0.28;
+        el.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+      });
+      el.addEventListener("pointerleave", () => { el.style.translate = ""; });
+    });
+  }
+
+  document.addEventListener("pointerdown", (e) => {
+    const b = e.target.closest(".fx");
+    if (!b || b.disabled) return;
+    const r = b.getBoundingClientRect();
+    const s = Math.max(r.width, r.height) * 2;
+    const span = document.createElement("span");
+    span.className = "ripple";
+    span.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+    b.appendChild(span);
+    span.addEventListener("animationend", () => span.remove());
+  });
+
+  // ==========================================================
+  // DRIFTING SPICE SPARK EMBERS CANVAS
+  // ==========================================================
+  (function embers(){
+    if (REDUCED) return;
+    const cv = document.getElementById("embers");
+    const ctx = cv.getContext("2d");
+    const palette = [
+      [240,216,164], [216,178,106], [233,162,59], [214,96,88]
+    ];
+    let W = 0, H = 0, parts = [], raf = null;
+
+    function make(initial){
+      const c = palette[(Math.random() * palette.length) | 0];
+      return {
+        x: Math.random() * W,
+        y: initial ? Math.random() * H : H + 20 + Math.random() * 60,
+        r: 0.6 + Math.random() * 1.9,
+        vy: 0.14 + Math.random() * 0.42,
+        sway: 0.2 + Math.random() * 0.5,
+        phase: Math.random() * 6.28,
+        speed: 0.4 + Math.random() * 0.9,
+        a: 0.25 + Math.random() * 0.6,
+        c: c
+      };
+    }
+
+    function resize(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const target = Math.round(clamp(W * H / 20000, 22, 64));
+      while (parts.length < target) parts.push(make(true));
+      parts.length = target;
+    }
+
+    function tick(t){
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+      const time = t / 1000;
+
+      for (const p of parts){
+        p.y -= p.vy;
+        p.x += Math.sin(time * p.speed + p.phase) * p.sway * 0.5;
+
+        const dx = p.x - pointer.x, dy = p.y - pointer.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 19600) {
+          const d = Math.sqrt(d2) || 1;
+          const f = (140 - d) / 140;
+          p.x += (dx / d) * f * 2.2;
+          p.y += (dy / d) * f * 2.2;
+        }
+
+        if (p.y < -20) Object.assign(p, make(false));
+        if (p.x < -20) p.x = W + 20;
+        if (p.x > W + 20) p.x = -20;
+
+        const life = clamp(Math.min((H - p.y) / 120, p.y / 160), 0, 1);
+        const flicker = 0.75 + Math.sin(time * 3 * p.speed + p.phase) * 0.25;
+        const alpha = p.a * life * flicker;
+        const [r, g, b] = p.c;
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${g},${b},${(alpha * 0.10).toFixed(3)})`;
+        ctx.arc(p.x, p.y, p.r * 6, 0, 6.283);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
+        ctx.arc(p.x, p.y, p.r, 0, 6.283);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(tick);
+    }
+
+    resize();
+    window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
+      else if (!raf) { raf = requestAnimationFrame(tick); }
+    });
+    raf = requestAnimationFrame(tick);
+  })();
+
+  // Initial Entrance & Welcome Greeting
+  setTimeout(() => addBotMessage(I18N_UI.en.greeting), REDUCED ? 100 : 1300);
+</script>
+</body>
+</html>
